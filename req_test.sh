@@ -1,9 +1,9 @@
 #!/bin/bash
 sleep 2
 count=0
-for j in {1..5} ; do
+while true ; do
   for i in {1..1000} ; do
-      curl --location 'localhost:8080/log' \
+      curl --location 'http://log-routing-service-spring-app-1:8080/log' \
       --header 'Content-Type: application/json' \
       --data '{
           "eventName" : "user.login",
