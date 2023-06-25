@@ -36,42 +36,47 @@ public class Consumer {
     }
 
 
-    private boolean consume() {
+    private void consume() {
         try {
             log.debug("Consumer | consume | started");
+            //Retry for 3 times...else ignore
+            int retry = 0;
             while(true) {
-                log.info("Consumer | consume | no. of request pending to process: {}", QueueUtil.size());
                 if(!QueueUtil.isEmpty()) {
+                    log.info("Consumer | consume | Found a request in queue | Size : {}", QueueUtil.size());
                     LogRequest logRequest = QueueUtil.peek();
-                    LogResponse logResponse = logIt(logRequest);
-                    if (logResponse.isStatus()) {
+                    LogResponse logResponse = log(logRequest);
+                    if (logResponse.isStatus() || retry == 3) {
                         QueueUtil.poll();
+                        retry=0;
+                    } else {
+                        retry++;
                     }
                 }
             }
         } catch (Exception e) {
             log.error("Consumer | consume | " +
                     "Exception occurred when trying to submit task for migrating {}", e.getMessage());
-            return false;
+            consumeAsync();
         }
     }
 
-    private LogResponse logIt(LogRequest logRequest) {
+    private LogResponse log(LogRequest logRequest) {
         try {
 
-            log.debug("LogService | log | Acquiring mutex for {} {}",
+            log.debug("Consumer | log | Acquiring mutex for {} {}",
                     logRequest.getSource(), logRequest.getSourceId());
             MutexUtil.mutex.acquire();
-            log.debug("LogService | log | Acquired mutex for {} {}",
+            log.debug("Consumer | log | Acquired mutex for {} {}",
                     logRequest.getSource(), logRequest.getSourceId());
             //1. Log to buffer
             boolean isLogged = logFileRepository.log(logRequest);
-            log.info("LogService | log | Logged to file {} {} {}",
+            log.info("Consumer | log | Logged to file {} {} {}",
                     logRequest.getSource(), logRequest.getSourceId(), isLogged);
             if (!isLogged) {
                 //TODO:- We can further improve this to retry but for sake of simplicity returning false.
                 MutexUtil.mutex.release();
-                log.warn("LogService | log | Released Mutex | Logged to file failed  {} {}",
+                log.warn("Consumer | log | Released Mutex | Logged to file failed  {} {}",
                         logRequest.getSource(), logRequest.getSourceId());
                 return new LogResponse(false);
             }
@@ -79,16 +84,16 @@ public class Consumer {
             int allowedMaxFileSize = fileConfig.getFileMaxSize();
             //current buffer size vs allowed max buffer size
             if (currentFileSizeInMB > allowedMaxFileSize) {
-                log.info("LogService | log | current file size is high {} {}",
+                log.info("Consumer | log | current file size is high {} {}",
                         currentFileSizeInMB, allowedMaxFileSize);
                 MutexUtil.mutex.release();
-                log.debug("LogService | log | Mutex released {} {}",
+                log.debug("Consumer | log | Mutex released {} {}",
                         logRequest.getSource(), logRequest.getSourceId());
                 //Requesting consumer to migrate data from buffer
                 return new LogResponse(consumerHandler.handle());
             }
             MutexUtil.mutex.release();
-            log.debug("LogService | log | Mutex released and returning success {} {}",
+            log.debug("Consumer | log | Mutex released and returning success {} {}",
                     logRequest.getSource(), logRequest.getSourceId());
             return new LogResponse(true);
         } catch (Exception e) {

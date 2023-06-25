@@ -20,10 +20,10 @@ public class MigrationService {
     @Autowired private LogFileRepository logFileRepository;
     @Autowired private LogDBRepository logDBRepository;
 
-//    @PostConstruct
-//    private void createLogTable() {
-//        logDBRepository.createLogTable();
-//    }
+    @PostConstruct
+    private void createLogTable() {
+        logDBRepository.createLogTable();
+    }
 
     /**
      * Migration of logs from buffer to destination
