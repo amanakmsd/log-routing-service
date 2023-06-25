@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 
 @Component
@@ -19,25 +20,34 @@ public class MigrationService {
     @Autowired private LogFileRepository logFileRepository;
     @Autowired private LogDBRepository logDBRepository;
 
+//    @PostConstruct
+//    private void createLogTable() {
+//        logDBRepository.createLogTable();
+//    }
 
+    /**
+     * Migration of logs from buffer to destination
+     * @return MigrationResponse  containing status flag
+     */
     @Scheduled(fixedDelay = 30000)
     public MigrationResponse migrate() {
         try {
-            log.info("MigrationService | migrate | Acquiring mutex");
+            log.debug("MigrationService | migrate | Acquiring mutex");
             MutexUtil.mutex.acquire();
-            log.info("MigrationService | migrate | Acquired mutex");
+            log.debug("MigrationService | migrate | Acquired mutex");
             List<LogRequest> logRequestList = logFileRepository.getFileContent();
-            log.info("MigrationService | migrate | Log request size : {}", logRequestList.size());
+            log.debug("MigrationService | migrate | Log request size : {}", logRequestList.size());
             boolean isLoggedSuccess = logDBRepository.batchLog(logRequestList);
             log.info("MigrationService | migrate | Batch logged to db : {}", isLoggedSuccess);
             if (isLoggedSuccess) {
-                //delete contents of file
+                //All the logs moved to db , hence clear buffer
+                // delete contents of file
                 log.info("MigrationService | migrate | Deleting contents of file");
                 logFileRepository.deleteFileContent();
             }
-            log.info("MigrationService | migrate | Releasing mutex");
+            log.debug("MigrationService | migrate | Releasing mutex");
             MutexUtil.mutex.release();
-            log.info("MigrationService | migrate | Released mutex successfully");
+            log.debug("MigrationService | migrate | Released mutex successfully");
             return new MigrationResponse(isLoggedSuccess);
         } catch (Exception e) {
             log.error("MigrationService | migrate | Exception occurred when migrating file contents to db : {}"

@@ -35,9 +35,11 @@ public class DBUtil {
         try {
             log.info("DBUtil| createNewConnection | Creating connection....");
             String myDriver = dbConfig.getMySQLDriverClassName();
-            String myUrl = dbConfig.getMySQLUrl();
+            String dbUrl = dbConfig.getDbUrl();
             Class.forName(myDriver);
-            conn = DriverManager.getConnection(myUrl, dbConfig.getMySQLUsername()
+//            log.debug("DBUtil| createNewConnection | {} {} {} {}", myDriver, dbUrl, dbConfig.getMySQLUsername(),
+//                    dbConfig.getMySQLPassword());
+            conn = DriverManager.getConnection(dbUrl, dbConfig.getMySQLUsername()
                     , dbConfig.getMySQLPassword());
             return conn;
         } catch (Exception e) {

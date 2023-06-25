@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.util.List;
 
 @Component
@@ -15,6 +16,23 @@ import java.util.List;
 public class LogDBRepository {
 
     @Autowired private DBUtil dbUtil;
+
+    public boolean createLogTable() {
+        try {
+            Connection conn = dbUtil.getConnection();
+            Statement statement = conn.createStatement();
+            String createTableQuery = "create table if not exists log_table(ID int NOT NULL " +
+                    "auto_increment primary key, EVENT_NAME varchar(255), TIMESTAMP BIGINT," +
+                    " SOURCE varchar(255), SOURCE_ID varchar(255), LOG_MESSAGE TEXT);";
+            statement.execute(createTableQuery);
+            log.info("LogDBRepository | createLogTable | successfully created log table");
+            return true;
+        } catch (Exception e) {
+            log.error("LogDBRepository | createLogTable | Exception occurred when creating log table {}"
+                    , e.getMessage());
+            return false;
+        }
+    }
 
 
     public boolean batchLog(List<LogRequest> logRequestList) {

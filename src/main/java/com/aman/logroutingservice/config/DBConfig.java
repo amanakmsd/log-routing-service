@@ -12,7 +12,7 @@ import org.springframework.context.annotation.PropertySource;
 @Setter
 public class DBConfig {
     @Value("${db.mysql.url}")
-    private String mySQLUrl;
+    private String dbUrl;
     @Value("${db.mysql.username}")
     private String mySQLUsername;
     @Value("${db.mysql.password}")

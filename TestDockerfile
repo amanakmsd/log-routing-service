@@ -1,0 +1,6 @@
+FROM ubuntu:latest
+COPY req_test.sh /app/req_test.sh
+RUN chmod +x /app/req_test.sh
+RUN apt-get -y update
+RUN apt-get -y install curl
+ENTRYPOINT ["./app/req_test.sh"]

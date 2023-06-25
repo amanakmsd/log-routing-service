@@ -1,5 +1,5 @@
-FROM openjdk:8-jre-alpine
+FROM openjdk:11
 EXPOSE 8080
 WORKDIR /app
-COPY target/customer-service-0.0.1-SNAPSHOT.jar .
-ENTRYPOINT [ "java", "-jar", "customer-service-0.0.1-SNAPSHOT.jar" ]
+COPY target/log-routing-service-0.0.1-SNAPSHOT.jar .
+ENTRYPOINT [ "java", "-jar", "log-routing-service-0.0.1-SNAPSHOT.jar" ]

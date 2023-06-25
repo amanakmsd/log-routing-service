@@ -14,14 +14,19 @@ public class ConsumerHandler {
 
     @Autowired private MigrationService migrationService;
 
-
-
     private final ExecutorService executorService;
 
     ConsumerHandler() {
         executorService = Executors.newFixedThreadPool(10);
+
     }
 
+    /**
+     * method is used to asynchronously migrate logs.
+     * This is the entry method for the consumer
+     * @return boolean value representing if the migration task
+     * is submitted successfully or not.
+     */
     public boolean handle() {
         try {
             Runnable migrateTaskRunnable = () -> migrationService.migrate();

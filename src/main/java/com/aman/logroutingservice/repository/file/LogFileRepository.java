@@ -16,11 +16,12 @@ import java.util.List;
 @Component
 public class LogFileRepository{
 
+    private static final String FILE_NAME = "temp.txt";
+
     public boolean log(LogRequest logRequest) {
         try {
             File file
-                    = new File("/Users/amanakmsd/IdeaProjects" +
-                    "/log-routing-service/src/main/resources/temp.txt");
+                    = new File(FILE_NAME);
             String logRequestString = new ObjectMapper().writeValueAsString(logRequest);
             FileUtils.writeStringToFile(
                     file, logRequestString + "\n", StandardCharsets.UTF_8, true);
@@ -33,8 +34,7 @@ public class LogFileRepository{
     }
 
     public double getFileSize() {
-        File file = new File("/Users/amanakmsd/IdeaProjects" +
-                "/log-routing-service/src/main/resources/temp.txt");
+        File file = new File(FILE_NAME);
         double fileSizeInMB =  FileUtil.getFileSizeMegaBytes(file);
         log.info("LogFileRepository | getFileSize | File size : {}", fileSizeInMB);
         return fileSizeInMB;
@@ -43,8 +43,7 @@ public class LogFileRepository{
     public List<LogRequest> getFileContent() {
         try {
             File file
-                    = new File("/Users/amanakmsd/IdeaProjects" +
-                    "/log-routing-service/src/main/resources/temp.txt");
+                    = new File(FILE_NAME);
             List<String> logList = FileUtils.readLines(file, StandardCharsets.UTF_8);
             List<LogRequest> logRequestList = new ArrayList<>();
             log.info("LogFileRepository | getFileSize | Number of elements in file : {}", logList.size());
@@ -61,8 +60,7 @@ public class LogFileRepository{
 
     public boolean deleteFileContent() {
         try {
-            File file = new File("/Users/amanakmsd/IdeaProjects" +
-                    "/log-routing-service/src/main/resources/temp.txt");
+            File file = new File(FILE_NAME);
             FileUtils.write(file, "", StandardCharsets.UTF_8);
             log.info("LogFileRepository | deleteFileContent | Success: {}", true);
             return true;
