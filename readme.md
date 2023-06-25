@@ -13,6 +13,19 @@ Log-Routing-Service is used to log request to database
 ![Alt text](doc/log-routing-service.png?raw=true "Log-Routing-Service")
 
 
+### API Curl for reference:
+```
+curl --location 'localhost:8080/log' \
+--header 'Content-Type: application/json' \
+--data '{
+    "eventName" : "user.login",
+    "timeStamp" : 123456,
+    "source" : "user",
+    "sourceId" : "user1234",
+    "logMessage" : "User logged successfully"
+}'
+```
+
 ## Note:
 Bunch of things can be improved in this service:
 1. Logging
